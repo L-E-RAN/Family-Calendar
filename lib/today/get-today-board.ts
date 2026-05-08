@@ -168,12 +168,34 @@ export async function getTodayBoard(
       return item.child_id === null
     })
 
-    return memberItems.map(item => ({
-      item,
-      completion: getCompletionForMember(item, memberProfile),
-      canComplete: canComplete(item, memberProfile),
-      canApprove: canApprove(item, memberProfile, currentProfile),
-    }))
+    return memberItems.map(item => {
+      // In tablet mode, fall back to child_id lookup if member has no profile
+      const completion = getCompletionForMember(item, memberProfile)
+        ?? (options.tabletMode && childId
+          ? completions.find(c => c.item_id === item.id && c.child_id === childId) ?? null
+          : null)
+
+      // In tablet mode: parent marks tasks on behalf of child, so skip role check
+      const itemCanComplete = options.tabletMode
+        ? (() => {
+            if (item.source_provider === 'mashov' && item.source_type !== 'homework') return false
+            return !completion || !['completed', 'approved', 'completed_pending_approval', 'late', 'missed'].includes(completion.status)
+          })()
+        : canComplete(item, memberProfile)
+
+      // canApprove: use child_id-based completion lookup in tablet mode
+      const approvalCompletion = completion
+      const itemCanApprove = options.tabletMode
+        ? currentProfile.role !== 'child' && !!approvalCompletion && approvalCompletion.status === 'completed_pending_approval'
+        : canApprove(item, memberProfile, currentProfile)
+
+      return {
+        item,
+        completion,
+        canComplete: itemCanComplete,
+        canApprove: itemCanApprove,
+      }
+    })
   }
 
   function buildMemberScore(memberProfile: Profile | null, childId: string | null): number {
