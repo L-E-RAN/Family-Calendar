@@ -13,7 +13,7 @@ import type {
 import { calculateScore } from '@/lib/rewards/calculate-score'
 import { calculateScreenTime } from '@/lib/rewards/calculate-screen-time'
 
-const MAX_COLUMNS = 5
+const MAX_COLUMNS = 3
 
 export async function getTodayBoard(
   supabase: SupabaseClient,
@@ -186,30 +186,8 @@ export async function getTodayBoard(
 
   const columns: TodayBoardMember[] = []
 
-  // Parent columns (up to 2)
-  for (let i = 0; i < Math.min(2, parentProfiles.length); i++) {
-    const profile = parentProfiles[i]
-    const items = buildItemsForMember(profile, null)
-    const score = buildMemberScore(profile, null)
-    columns.push({
-      type: 'parent',
-      profile,
-      child: null,
-      items,
-      totalScore: score,
-      earnedScreenMinutes: 0,
-      nextTierMinutes: null,
-      nextTierPointsNeeded: null,
-      nextTierLabel: null,
-    })
-  }
-  // Fill up to 2 parent slots with placeholder if needed
-  while (columns.length < 2) {
-    columns.push({ type: 'placeholder', profile: null, child: null, items: [], totalScore: 0, earnedScreenMinutes: 0, nextTierMinutes: null, nextTierPointsNeeded: null, nextTierLabel: null })
-  }
-
-  // Child columns (up to 3 total slots)
-  const childSlots = MAX_COLUMNS - 2
+  // Child columns only
+  const childSlots = MAX_COLUMNS
   for (let i = 0; i < childSlots; i++) {
     const child = activeChildren[i] ?? null
     if (!child) {
