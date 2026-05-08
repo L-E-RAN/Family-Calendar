@@ -33,11 +33,9 @@ export default function ScreenTimeSummary({
           <span>זמן מסך: {effectiveMinutes > 0 ? timeLabel : 'טרם הושג'}</span>
         )}
       </div>
-      {!expired && nextTierPointsNeeded !== null && (
-        <p className="text-xs text-muted-foreground pr-5">
-          עוד {nextTierPointsNeeded} נק׳ למדרגה הבאה
-          {nextTierLabel ? ` (${nextTierLabel})` : ''}
-          {nextTierMinutes ? ` — ${nextTierMinutes}ד׳` : ''}
+      {!expired && nextTierPointsNeeded !== null && nextTierMinutes !== null && (
+        <p className="text-xs text-green-600 font-medium pr-5">
+          עוד {nextTierPointsNeeded} נק׳ = +{nextTierMinutes - earnedScreenMinutes}ד׳ מסך{nextTierLabel ? ` (${nextTierLabel})` : ''}!
         </p>
       )}
     </div>
