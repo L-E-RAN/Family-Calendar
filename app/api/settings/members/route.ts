@@ -23,14 +23,8 @@ export async function GET() {
     .eq('family_id', profile.family_id)
     .order('created_at')
 
-  const authAdmin = createAuthAdminClient()
-  const { data: { users } } = await authAdmin.auth.admin.listUsers({ perPage: 1000 })
-
-  const emailByAuthId = Object.fromEntries(users.map(u => [u.id, u.email ?? '']))
-
   const members = (profiles ?? []).map(p => ({
     ...p,
-    email: emailByAuthId[p.auth_user_id] ?? '',
     is_self: p.auth_user_id === user.id,
   }))
 
@@ -52,18 +46,21 @@ export async function POST(request: NextRequest) {
   if (profile.role !== 'family_admin') return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
 
   const body = await request.json()
-  const { email, password, display_name, role } = body
+  const { password, display_name, role } = body
 
-  if (!email || !password || !display_name || !role) {
+  if (!password || !display_name || !role) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
   if (!['parent', 'child'].includes(role)) {
     return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
   }
 
+  // Generate opaque internal email — users never see or use it
+  const internalEmail = `member-${crypto.randomUUID()}@family.local`
+
   const authAdmin = createAuthAdminClient()
   const { data: newUser, error: authError } = await authAdmin.auth.admin.createUser({
-    email,
+    email: internalEmail,
     password,
     email_confirm: true,
   })
@@ -89,5 +86,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: profileError.message }, { status: 500 })
   }
 
-  return NextResponse.json({ member: { ...newProfile, email, is_self: false } }, { status: 201 })
+  return NextResponse.json({ member: { ...newProfile, is_self: false } }, { status: 201 })
 }
