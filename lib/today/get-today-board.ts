@@ -82,7 +82,7 @@ export async function getTodayBoard(
   ] = await Promise.all([
     base().eq('source_type', 'lesson').gte('starts_at', todayStart).lte('starts_at', todayEnd),
     base().eq('source_type', 'exam').gte('starts_at', todayStart).lte('starts_at', twoWeeks),
-    base().eq('source_type', 'homework').gte('due_at', todayStart),
+    base().eq('source_type', 'homework').gte('due_at', todayStart).lte('due_at', todayEnd),
     base().eq('source_type', 'homework').is('due_at', null),
     base().eq('source_type', 'task').eq('status', 'active'),
     base().eq('source_type', 'parent_approval').eq('status', 'needs_action'),
