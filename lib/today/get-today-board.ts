@@ -15,9 +15,15 @@ import { calculateScreenTime } from '@/lib/rewards/calculate-screen-time'
 
 const MAX_COLUMNS = 3
 
+export interface GetTodayBoardOptions {
+  /** Show all active children instead of capping at MAX_COLUMNS */
+  tabletMode?: boolean
+}
+
 export async function getTodayBoard(
   supabase: SupabaseClient,
   date: Date = new Date(),
+  options: GetTodayBoardOptions = {},
 ): Promise<TodayBoard> {
   const dateStr = format(date, 'yyyy-MM-dd')
   const todayStart = startOfDay(date).toISOString()
@@ -178,48 +184,68 @@ export async function getTodayBoard(
 
   function buildScreenTime(childId: string | null): ReturnType<typeof calculateScreenTime> {
     if (!childId) return { earnedMinutes: 0, currentTier: null, nextTier: null, pointsNeededForNext: null }
+    const childTiers = tiers.filter(t => t.child_id === childId)
     const childProfile = profiles.find(p => p.child_id === childId) ?? null
     const score = buildMemberScore(childProfile, childId)
-    return calculateScreenTime(score, tiers)
+    return calculateScreenTime(score, childTiers)
   }
 
   const columns: TodayBoardMember[] = []
 
-  // Child columns only
-  const childSlots = MAX_COLUMNS
-  for (let i = 0; i < childSlots; i++) {
-    const child = activeChildren[i] ?? null
-    if (!child) {
-      // Inactive or future slot
-      const inactive = inactiveChildren[i - activeChildren.length] ?? null
+  if (options.tabletMode) {
+    // Tablet mode: show every active child, no cap
+    for (const child of activeChildren) {
+      const childProfile = profiles.find(p => p.child_id === child.id) ?? null
+      const memberItems = buildItemsForMember(childProfile, child)
+      const screenTime = buildScreenTime(child.id)
+      const score = buildMemberScore(childProfile, child.id)
       columns.push({
-        type: inactive ? 'child' : 'placeholder',
-        profile: null,
-        child: inactive,
-        items: [],
-        totalScore: 0,
-        earnedScreenMinutes: 0,
-        nextTierMinutes: null,
-        nextTierPointsNeeded: null,
-        nextTierLabel: null,
+        type: 'child',
+        profile: childProfile,
+        child,
+        items: memberItems,
+        totalScore: score,
+        earnedScreenMinutes: screenTime.earnedMinutes,
+        nextTierMinutes: screenTime.nextTier?.screen_time_minutes ?? null,
+        nextTierPointsNeeded: screenTime.pointsNeededForNext,
+        nextTierLabel: screenTime.nextTier?.label ?? null,
       })
-      continue
     }
-    const childProfile = profiles.find(p => p.child_id === child.id) ?? null
-    const memberItems = buildItemsForMember(childProfile, child)
-    const screenTime = buildScreenTime(child.id)
-    const score = buildMemberScore(childProfile, child.id)
-    columns.push({
-      type: 'child',
-      profile: childProfile,
-      child,
-      items: memberItems,
-      totalScore: score,
-      earnedScreenMinutes: screenTime.earnedMinutes,
-      nextTierMinutes: screenTime.nextTier?.screen_time_minutes ?? null,
-      nextTierPointsNeeded: screenTime.pointsNeededForNext,
-      nextTierLabel: screenTime.nextTier?.label ?? null,
-    })
+  } else {
+    // Regular mode: child columns only, capped at MAX_COLUMNS
+    for (let i = 0; i < MAX_COLUMNS; i++) {
+      const child = activeChildren[i] ?? null
+      if (!child) {
+        const inactive = inactiveChildren[i - activeChildren.length] ?? null
+        columns.push({
+          type: inactive ? 'child' : 'placeholder',
+          profile: null,
+          child: inactive,
+          items: [],
+          totalScore: 0,
+          earnedScreenMinutes: 0,
+          nextTierMinutes: null,
+          nextTierPointsNeeded: null,
+          nextTierLabel: null,
+        })
+        continue
+      }
+      const childProfile = profiles.find(p => p.child_id === child.id) ?? null
+      const memberItems = buildItemsForMember(childProfile, child)
+      const screenTime = buildScreenTime(child.id)
+      const score = buildMemberScore(childProfile, child.id)
+      columns.push({
+        type: 'child',
+        profile: childProfile,
+        child,
+        items: memberItems,
+        totalScore: score,
+        earnedScreenMinutes: screenTime.earnedMinutes,
+        nextTierMinutes: screenTime.nextTier?.screen_time_minutes ?? null,
+        nextTierPointsNeeded: screenTime.pointsNeededForNext,
+        nextTierLabel: screenTime.nextTier?.label ?? null,
+      })
+    }
   }
 
   return { date: dateStr, columns, currentProfile }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, Sun, CheckSquare, Users, Settings } from 'lucide-react'
+import { CalendarDays, Sun, CheckSquare, Users, Settings, Tablet } from 'lucide-react'
 import type { Profile, Child } from '@/types'
 import { cn } from '@/lib/utils'
 import { createContext, useContext } from 'react'
@@ -20,6 +20,7 @@ const NAV = [
   { href: '/calendar', icon: CalendarDays, label: 'לוח' },
   { href: '/tasks', icon: CheckSquare, label: 'משימות' },
   { href: '/children', icon: Users, label: 'ילדים' },
+  { href: '/settings/tablet', icon: Tablet, label: 'טאבלט' },
   { href: '/settings/integrations', icon: Settings, label: 'הגדרות' },
 ]
 

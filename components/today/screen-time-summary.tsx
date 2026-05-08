@@ -1,3 +1,5 @@
+'use client'
+
 import { Monitor } from 'lucide-react'
 
 interface Props {
@@ -13,17 +15,25 @@ export default function ScreenTimeSummary({
   nextTierPointsNeeded,
   nextTierLabel,
 }: Props) {
-  const hours = Math.floor(earnedMinutes / 60)
-  const mins = earnedMinutes % 60
+  // Screen time resets daily at 22:00 — after that, today's time has expired
+  const expired = new Date().getHours() >= 22
+  const effectiveMinutes = expired ? 0 : earnedMinutes
+
+  const hours = Math.floor(effectiveMinutes / 60)
+  const mins = effectiveMinutes % 60
   const timeLabel = hours > 0 ? `${hours}ש׳ ${mins > 0 ? `${mins}ד׳` : ''}` : `${mins}ד׳`
 
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-1.5 text-sm font-medium text-blue-600">
         <Monitor className="w-4 h-4" />
-        <span>זמן מסך: {earnedMinutes > 0 ? timeLabel : 'טרם הושג'}</span>
+        {expired ? (
+          <span className="text-gray-400">זמן מסך: פג תוקף (מתאפס מחר)</span>
+        ) : (
+          <span>זמן מסך: {effectiveMinutes > 0 ? timeLabel : 'טרם הושג'}</span>
+        )}
       </div>
-      {nextTierPointsNeeded !== null && (
+      {!expired && nextTierPointsNeeded !== null && (
         <p className="text-xs text-muted-foreground pr-5">
           עוד {nextTierPointsNeeded} נק׳ למדרגה הבאה
           {nextTierLabel ? ` (${nextTierLabel})` : ''}
