@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const SETTINGS_NAV = [
+  { href: '/settings/members', label: 'חברי משפחה' },
   { href: '/settings/integrations', label: 'אינטגרציות' },
   { href: '/settings/screen-time', label: 'זמן מסך' },
 ]
