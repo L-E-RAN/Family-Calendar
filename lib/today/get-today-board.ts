@@ -207,7 +207,7 @@ export async function getTodayBoard(
 
   function buildScreenTime(childId: string | null): ReturnType<typeof calculateScreenTime> {
     if (!childId) return { earnedMinutes: 0, currentTier: null, nextTier: null, pointsNeededForNext: null }
-    const childTiers = tiers.filter(t => t.child_id === childId)
+    const childTiers = tiers.filter(t => t.child_id === childId || t.child_id === null)
     const childProfile = profiles.find(p => p.child_id === childId) ?? null
     const score = buildMemberScore(childProfile, childId)
     return calculateScreenTime(score, childTiers)
