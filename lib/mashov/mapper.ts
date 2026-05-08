@@ -52,6 +52,7 @@ export function mapHomeworkToItem(
     deadline_time: null,
     requires_parent_approval: false,
     reward_enabled: true,
+    is_recurring: false,
   }
 }
 
