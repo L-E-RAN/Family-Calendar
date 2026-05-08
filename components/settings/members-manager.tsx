@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -108,13 +107,12 @@ export default function MembersManager({
           <p className="text-sm text-muted-foreground">כל אחד מתחבר עם המייל והסיסמה שלו</p>
         </div>
         {isAdmin && (
+          <>
+            <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
+              <UserPlus className="w-4 h-4" />
+              הוסף חבר
+            </Button>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                הוסף חבר
-              </Button>
-            </DialogTrigger>
             <DialogContent dir="rtl" className="max-w-sm">
               <DialogHeader>
                 <DialogTitle>הוסף חבר משפחה</DialogTitle>
@@ -174,6 +172,7 @@ export default function MembersManager({
               </form>
             </DialogContent>
           </Dialog>
+          </>
         )}
       </div>
 
