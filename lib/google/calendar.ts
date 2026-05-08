@@ -213,6 +213,7 @@ export function mapGoogleEventToItem(
     deadline_time: null,
     requires_parent_approval: false,
     reward_enabled: false,
+    is_recurring: false,
   }
 }
 
