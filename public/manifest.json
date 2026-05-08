@@ -3,10 +3,10 @@
   "short_name": "לוח שנה",
   "description": "לוח שנה משפחתי - שיעורי בית, מבחנים, אירועים ומשימות",
   "start_url": "/today",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#ffffff",
   "theme_color": "#6366f1",
-  "orientation": "any",
+  "orientation": "landscape",
   "dir": "rtl",
   "lang": "he",
   "icons": [
