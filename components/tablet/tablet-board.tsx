@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
@@ -10,6 +10,7 @@ import TabletMemberColumn from './tablet-member-column'
 import PinPad from './pin-pad'
 import { useTablet } from './tablet-context'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   board: TodayBoard
@@ -25,6 +26,19 @@ export default function TabletBoard({ board }: Props) {
   const handleCompletionChange = useCallback(() => {
     router.refresh()
   }, [router])
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('tablet-completions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'daily_item_completions', filter: `date=eq.${board.date}` },
+        () => router.refresh()
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [board.date, router])
 
   const activeColumns = board.columns.filter(c => c.type !== 'placeholder')
 
