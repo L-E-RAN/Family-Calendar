@@ -10,7 +10,6 @@ import TabletMemberColumn from './tablet-member-column'
 import PinPad from './pin-pad'
 import { useTablet } from './tablet-context'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   board: TodayBoard
@@ -28,13 +27,9 @@ export default function TabletBoard({ board }: Props) {
   }, [router])
 
   useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`family-${board.currentProfile.family_id}`)
-      .on('broadcast', { event: 'completion_changed' }, () => router.refresh())
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [board.currentProfile.family_id, router])
+    const id = setInterval(() => router.refresh(), 15_000)
+    return () => clearInterval(id)
+  }, [router])
 
   const activeColumns = board.columns.filter(c => c.type !== 'placeholder')
 

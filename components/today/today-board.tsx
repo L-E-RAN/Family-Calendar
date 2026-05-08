@@ -6,7 +6,6 @@ import { he } from 'date-fns/locale'
 import type { TodayBoard } from '@/types'
 import MemberColumn from './member-column'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   board: TodayBoard
@@ -29,13 +28,9 @@ export default function TodayBoard({ board }: Props) {
   }, [router])
 
   useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`family-${board.currentProfile.family_id}`)
-      .on('broadcast', { event: 'completion_changed' }, () => router.refresh())
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [board.currentProfile.family_id, router])
+    const id = setInterval(() => router.refresh(), 15_000)
+    return () => clearInterval(id)
+  }, [router])
 
   const activeColumns = board.columns.filter(c => c.type !== 'placeholder')
 
