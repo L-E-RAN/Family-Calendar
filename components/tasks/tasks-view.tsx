@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
-import { Plus, CheckCircle2, Circle, Trash2 } from 'lucide-react'
+import { Plus, CheckCircle2, Circle, Trash2, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import type { CalendarItem, Child, Profile } from '@/types'
 import CreateTaskDialog from '@/components/calendar/create-task-dialog'
+import EditTaskDialog from '@/components/calendar/edit-task-dialog'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
@@ -21,6 +22,7 @@ interface Props {
 export default function TasksView({ tasks: initialTasks, children, profile }: Props) {
   const [tasks, setTasks] = useState(initialTasks)
   const [showCreate, setShowCreate] = useState(false)
+  const [editTask, setEditTask] = useState<CalendarItem | null>(null)
   const [filter, setFilter] = useState<'active' | 'completed' | 'all'>('active')
   const router = useRouter()
   const isParent = profile.role !== 'child'
@@ -138,12 +140,20 @@ export default function TasksView({ tasks: initialTasks, children, profile }: Pr
                   )}
                 </div>
                 {isParent && task.source_type === 'task' && (
-                  <button
-                    className="text-gray-400 hover:text-red-500 shrink-0 mt-0.5"
-                    onClick={() => deleteTask(task.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex gap-1 shrink-0 mt-0.5">
+                    <button
+                      className="text-gray-400 hover:text-indigo-500"
+                      onClick={() => setEditTask(task)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="text-gray-400 hover:text-red-500"
+                      onClick={() => deleteTask(task.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -165,6 +175,17 @@ export default function TasksView({ tasks: initialTasks, children, profile }: Pr
         onCreated={() => {
           setShowCreate(false)
           router.refresh()
+        }}
+      />
+
+      <EditTaskDialog
+        task={editTask}
+        open={!!editTask}
+        onOpenChange={open => { if (!open) setEditTask(null) }}
+        children={children}
+        onUpdated={updated => {
+          setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
+          setEditTask(null)
         }}
       />
     </div>
