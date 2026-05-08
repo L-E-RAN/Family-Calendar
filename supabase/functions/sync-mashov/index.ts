@@ -101,6 +101,16 @@ Deno.serve(async (_req) => {
           }
         }
 
+        // Delete homework older than 30 days
+        const cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        await supabase
+          .from('calendar_items')
+          .delete()
+          .eq('family_id', integration.family_id)
+          .eq('source_provider', 'mashov')
+          .eq('source_type', 'homework')
+          .lt('due_at', cutoff)
+
         const status = errors.length > 0 && errors.length === children.length ? 'error' : 'connected'
         await supabase
           .from('integrations')
@@ -331,8 +341,8 @@ async function mapHomework(hw: MashovItem, familyId: string, childId: string, in
     source_updated_at: hw.assignedAt ? new Date(hw.assignedAt as string).toISOString() : null,
     raw: (hw._raw ?? hw) as Record<string, unknown>,
     created_by_profile_id: null, updated_by_profile_id: null,
-    points_value: 0, penalty_points: 0, deadline_time: null,
-    requires_parent_approval: false, reward_enabled: false,
+    points_value: 5, penalty_points: 0, deadline_time: null,
+    requires_parent_approval: false, reward_enabled: true,
   }
 }
 
