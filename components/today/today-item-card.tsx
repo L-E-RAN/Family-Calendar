@@ -48,7 +48,7 @@ export default function TodayItemCard({ boardItem, currentProfile, onCompletionC
   const [loading, setLoading] = useState(false)
 
   const status = completion?.status ?? 'pending'
-  const isReadOnly = item.source_provider === 'mashov'
+  const isReadOnly = item.source_provider === 'mashov' && item.source_type !== 'homework'
   const isLesson = item.source_type === 'lesson'
   const isExam = item.source_type === 'exam'
   const showNoAction = isReadOnly || isLesson || isExam

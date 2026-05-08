@@ -137,7 +137,7 @@ export async function getTodayBoard(
 
   function canComplete(item: CalendarItem, profile: Profile | null): boolean {
     if (!profile) return false
-    if (item.source_provider === 'mashov') return false
+    if (item.source_provider === 'mashov' && item.source_type !== 'homework') return false
     const done = getCompletionForMember(item, profile)
     if (done && ['completed', 'approved', 'completed_pending_approval', 'late', 'missed'].includes(done.status)) return false
     if (profile.role === 'child') {

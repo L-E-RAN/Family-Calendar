@@ -114,6 +114,11 @@ export default function TasksView({ tasks: initialTasks, children, profile }: Pr
                         {task.child.name}
                       </Badge>
                     )}
+                    {task.source_type === 'homework' && (
+                      <Badge variant="outline" className="text-xs text-indigo-600 border-indigo-200">
+                        שיעורי בית
+                      </Badge>
+                    )}
                     {task.priority && task.priority !== 'normal' && (
                       <span className={`text-xs px-1.5 py-0.5 rounded ${PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.normal}`}>
                         {task.priority === 'high' ? 'גבוה' : 'נמוך'}
@@ -124,12 +129,15 @@ export default function TasksView({ tasks: initialTasks, children, profile }: Pr
                         {format(new Date(task.due_at), 'd בMMMM', { locale: he })}
                       </span>
                     )}
+                    {task.reward_enabled && task.points_value > 0 && (
+                      <span className="text-xs text-green-600">+{task.points_value} נק׳</span>
+                    )}
                   </div>
                   {task.description && (
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
                   )}
                 </div>
-                {isParent && (
+                {isParent && task.source_type === 'task' && (
                   <button
                     className="text-gray-400 hover:text-red-500 shrink-0 mt-0.5"
                     onClick={() => deleteTask(task.id)}

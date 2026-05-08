@@ -13,7 +13,7 @@ export default async function TasksPage() {
   let query = supabase
     .from('calendar_items')
     .select('*, child:children(id, name, color), overlay:calendar_item_overlays(*)')
-    .eq('source_type', 'task')
+    .in('source_type', ['task', 'homework'])
     .neq('status', 'hidden')
     .neq('status', 'cancelled')
     .order('due_at', { nullsFirst: false })

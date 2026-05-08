@@ -47,11 +47,11 @@ export function mapHomeworkToItem(
     raw: (hw._raw ?? hw) as Record<string, unknown>,
     created_by_profile_id: null,
     updated_by_profile_id: null,
-    points_value: 0,
+    points_value: 5,
     penalty_points: 0,
     deadline_time: null,
     requires_parent_approval: false,
-    reward_enabled: false,
+    reward_enabled: true,
   }
 }
 
