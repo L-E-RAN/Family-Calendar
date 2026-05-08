@@ -160,24 +160,32 @@ export class RealMashovAdapter implements MashovAdapter {
       homeworkId?: number | string
       lessonId?: number | string
       subject?: string
+      subjectName?: string
       teacherName?: string
       homeworkContent?: string
+      homework?: string
+      remark?: string
       lessonDate?: string
       dueDate?: string
       assignDate?: string
     }>
 
-    return (Array.isArray(data) ? data : []).map(h => ({
-      id: String(h.homeworkId ?? h.lessonId ?? Math.random()),
-      studentId: params.studentId,
-      subject: h.subject ?? '',
-      teacher: h.teacherName ?? '',
-      title: h.homeworkContent?.substring(0, 80) ?? 'שיעורי בית',
-      description: h.homeworkContent ?? '',
-      assignedAt: normalizeDate(h.assignDate ?? h.lessonDate) ?? params.from,
-      dueAt: normalizeDate(h.dueDate),
-      lessonDate: normalizeDate(h.lessonDate),
-    })) satisfies MashovHomework[]
+    return (Array.isArray(data) ? data : []).map(h => {
+      const content = h.homework ?? h.homeworkContent ?? h.remark ?? ''
+      const subject = h.subjectName ?? h.subject ?? ''
+      return {
+        id: String(h.homeworkId ?? h.lessonId ?? Math.random()),
+        studentId: params.studentId,
+        subject,
+        teacher: h.teacherName ?? '',
+        title: content.substring(0, 80) || subject || 'שיעורי בית',
+        description: content,
+        assignedAt: normalizeDate(h.assignDate ?? h.lessonDate) ?? params.from,
+        dueAt: normalizeDate(h.dueDate),
+        lessonDate: normalizeDate(h.lessonDate),
+        _raw: h,
+      }
+    }) satisfies MashovHomework[]
   }
 
   async fetchTimetable(params: { studentId: string; from: string; to: string }): Promise<MashovLesson[]> {

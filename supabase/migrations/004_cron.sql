@@ -84,6 +84,22 @@ select cron.schedule(
   $$
 );
 
+-- Evaluate reward deadlines every 15 minutes
+select cron.schedule(
+  'evaluate-daily-deadlines',
+  '*/15 * * * *',
+  $$
+    select net.http_post(
+      url := current_setting('app.supabase_url') || '/functions/v1/evaluate-daily-deadlines',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || current_setting('app.supabase_service_role_key')
+      ),
+      body := '{}'::jsonb
+    );
+  $$
+);
+
 -- Purge old data nightly at 01:00 UTC = 03:00 IST
 select cron.schedule(
   'purge-old-items',

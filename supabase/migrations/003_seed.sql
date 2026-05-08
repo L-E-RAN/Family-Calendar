@@ -18,11 +18,12 @@ insert into children (id, family_id, name, color, active, school_name) values
   ('00000000-0000-0000-0001-000000000003', '00000000-0000-0000-0000-000000000001', 'ילד ג (עתידי)', '#10b981', false, null)
 on conflict do nothing;
 
--- Mock local tasks
+-- Mock local tasks (with reward fields)
 insert into calendar_items (
   id, family_id, child_id, source_provider, source_type,
   dedupe_key, title, description, due_at, all_day, status,
-  priority, visibility, is_editable
+  priority, visibility, is_editable,
+  reward_enabled, points_value, penalty_points, deadline_time, requires_parent_approval
 ) values
   (
     '00000000-0000-0000-0002-000000000001',
@@ -33,7 +34,8 @@ insert into calendar_items (
     'לסדר את החדר',
     'לסדר ולנקות את חדר השינה',
     now() + interval '1 day',
-    true, 'active', 'normal', 'family', true
+    true, 'active', 'normal', 'family', true,
+    true, 10, 5, '18:00', false
   ),
   (
     '00000000-0000-0000-0002-000000000002',
@@ -44,7 +46,8 @@ insert into calendar_items (
     'קניות שבועיות',
     null,
     now() + interval '2 days',
-    true, 'active', 'high', 'family', true
+    true, 'active', 'high', 'family', true,
+    false, 0, 0, null, false
   ),
   (
     '00000000-0000-0000-0002-000000000003',
@@ -55,9 +58,50 @@ insert into calendar_items (
     'אימון כדורסל',
     'אל תשכח ציוד ספורט',
     now() + interval '3 days',
-    false, 'active', 'normal', 'family', true
+    false, 'active', 'normal', 'family', true,
+    true, 15, 0, '16:00', false
+  ),
+  (
+    '00000000-0000-0000-0002-000000000004',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0001-000000000001',
+    'local', 'task',
+    'local:task:seed-4',
+    'שיעורי בית במתמטיקה',
+    'לסיים את כל התרגילים לפני הערב',
+    date_trunc('day', now()) + interval '20 hours',
+    false, 'active', 'high', 'family', true,
+    true, 20, 10, '20:00', true
+  ),
+  (
+    '00000000-0000-0000-0002-000000000005',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0001-000000000002',
+    'local', 'task',
+    'local:task:seed-5',
+    'קריאה יומית',
+    'קרא 20 דקות בספר',
+    date_trunc('day', now()) + interval '21 hours',
+    false, 'active', 'normal', 'family', true,
+    true, 8, 0, '21:00', false
   )
 on conflict (dedupe_key) do nothing;
+
+-- Screen time reward tiers for active children
+insert into screen_time_reward_tiers (
+  id, family_id, child_id, min_points, screen_time_minutes, label, active
+) values
+  -- ילד א tiers
+  ('00000000-0000-0000-0008-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000001', 0,  0,   'אין זמן מסך', true),
+  ('00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000001', 10, 30,  'בסיסי',       true),
+  ('00000000-0000-0000-0008-000000000003', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000001', 25, 60,  'טוב',         true),
+  ('00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000001', 45, 90,  'מצוין',       true),
+  -- ילד ב tiers
+  ('00000000-0000-0000-0008-000000000005', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000002', 0,  0,   'אין זמן מסך', true),
+  ('00000000-0000-0000-0008-000000000006', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000002', 10, 30,  'בסיסי',       true),
+  ('00000000-0000-0000-0008-000000000007', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000002', 20, 60,  'טוב',         true),
+  ('00000000-0000-0000-0008-000000000008', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0001-000000000002', 40, 120, 'מצוין',       true)
+on conflict do nothing;
 
 -- Mock Google Calendar events
 insert into calendar_items (

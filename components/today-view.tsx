@@ -234,6 +234,7 @@ export default function TodayView({ profile, lessons, homework, exams, approvals
 
 function HomeworkRow({ item, onComplete }: { item: CalendarItem; onComplete: (item: CalendarItem) => void }) {
   const done = item.overlay?.local_status === 'completed' || item.status === 'completed'
+  const content = item.description || (item.title !== 'שיעורי בית' ? item.title : null)
   return (
     <div className={`flex items-start gap-3 py-2 border-b last:border-0 ${done ? 'opacity-60' : ''}`}>
       <div
@@ -241,9 +242,13 @@ function HomeworkRow({ item, onComplete }: { item: CalendarItem; onComplete: (it
         style={{ backgroundColor: item.child?.color || '#6366f1' }}
       />
       <div className="flex-1 min-w-0">
-        <p className={`font-medium text-sm ${done ? 'line-through' : ''}`}>{item.title}</p>
-        <p className="text-xs text-muted-foreground">
-          {item.subject && `${item.subject} | `}
+        <p className={`font-medium text-sm ${done ? 'line-through' : ''}`}>
+          {item.subject || 'שיעורי בית'}
+        </p>
+        {content && (
+          <p className={`text-sm text-gray-700 mt-0.5 ${done ? 'line-through' : ''}`}>{content}</p>
+        )}
+        <p className="text-xs text-muted-foreground mt-0.5">
           {item.teacher}
           {item.due_at && ` | עד ${format(new Date(item.due_at), 'd/M')}`}
         </p>

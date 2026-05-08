@@ -208,6 +208,11 @@ export function mapGoogleEventToItem(
     raw: event as unknown as Record<string, unknown>,
     created_by_profile_id: null,
     updated_by_profile_id: null,
+    points_value: 0,
+    penalty_points: 0,
+    deadline_time: null,
+    requires_parent_approval: false,
+    reward_enabled: false,
   }
 }
 

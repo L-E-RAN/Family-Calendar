@@ -30,6 +30,7 @@ export interface MashovHomework {
   assignedAt: string
   dueAt: string | null
   lessonDate: string | null
+  _raw?: Record<string, unknown>
 }
 
 export interface MashovLesson {

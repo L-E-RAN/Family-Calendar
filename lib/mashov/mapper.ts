@@ -44,9 +44,14 @@ export function mapHomeworkToItem(
     visibility: 'family',
     is_editable: false,
     source_updated_at: hw.assignedAt ? new Date(hw.assignedAt).toISOString() : null,
-    raw: hw as unknown as Record<string, unknown>,
+    raw: (hw._raw ?? hw) as Record<string, unknown>,
     created_by_profile_id: null,
     updated_by_profile_id: null,
+    points_value: 0,
+    penalty_points: 0,
+    deadline_time: null,
+    requires_parent_approval: false,
+    reward_enabled: false,
   }
 }
 
@@ -88,6 +93,11 @@ export function mapLessonToItem(
     raw: lesson as unknown as Record<string, unknown>,
     created_by_profile_id: null,
     updated_by_profile_id: null,
+    points_value: 0,
+    penalty_points: 0,
+    deadline_time: null,
+    requires_parent_approval: false,
+    reward_enabled: false,
   }
 }
 
@@ -132,6 +142,11 @@ export function mapExamToItem(
     raw: exam as unknown as Record<string, unknown>,
     created_by_profile_id: null,
     updated_by_profile_id: null,
+    points_value: 0,
+    penalty_points: 0,
+    deadline_time: null,
+    requires_parent_approval: false,
+    reward_enabled: false,
   }
 }
 
@@ -174,5 +189,10 @@ export function mapParentApprovalToItem(
     raw: approval as unknown as Record<string, unknown>,
     created_by_profile_id: null,
     updated_by_profile_id: null,
+    points_value: 0,
+    penalty_points: 0,
+    deadline_time: null,
+    requires_parent_approval: false,
+    reward_enabled: false,
   }
 }

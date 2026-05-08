@@ -44,6 +44,11 @@ export async function POST(request: NextRequest) {
       is_editable: true,
       created_by_profile_id: profile.id,
       updated_by_profile_id: profile.id,
+      reward_enabled: body.reward_enabled ?? false,
+      points_value: body.points_value ?? 0,
+      penalty_points: body.penalty_points ?? 0,
+      deadline_time: body.deadline_time ?? null,
+      requires_parent_approval: body.requires_parent_approval ?? false,
     })
     .select()
     .single()

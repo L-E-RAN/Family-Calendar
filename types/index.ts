@@ -107,9 +107,82 @@ export interface CalendarItem {
   updated_by_profile_id: string | null
   created_at: string
   updated_at: string
+  // reward fields
+  points_value: number
+  penalty_points: number
+  deadline_time: string | null
+  requires_parent_approval: boolean
+  reward_enabled: boolean
   // joined
   child?: Child
   overlay?: CalendarItemOverlay
+}
+
+export type CompletionStatus =
+  | 'pending'
+  | 'completed'
+  | 'completed_pending_approval'
+  | 'late'
+  | 'missed'
+  | 'approved'
+  | 'rejected'
+
+export interface DailyItemCompletion {
+  id: string
+  family_id: string
+  item_id: string
+  profile_id: string
+  child_id: string | null
+  completion_date: string
+  status: CompletionStatus
+  completed_at: string | null
+  completed_by_profile_id: string | null
+  points_awarded: number
+  penalty_applied: number
+  parent_approved_at: string | null
+  parent_approved_by_profile_id: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ScreenTimeRewardTier {
+  id: string
+  family_id: string
+  child_id: string
+  min_points: number
+  screen_time_minutes: number
+  label: string | null
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface TodayBoardItem {
+  item: CalendarItem
+  completion: DailyItemCompletion | null
+  canComplete: boolean
+  canApprove: boolean
+}
+
+export type BoardMemberType = 'parent' | 'child' | 'placeholder'
+
+export interface TodayBoardMember {
+  type: BoardMemberType
+  profile: Profile | null
+  child: Child | null
+  items: TodayBoardItem[]
+  totalScore: number
+  earnedScreenMinutes: number
+  nextTierMinutes: number | null
+  nextTierPointsNeeded: number | null
+  nextTierLabel: string | null
+}
+
+export interface TodayBoard {
+  date: string
+  columns: TodayBoardMember[]
+  currentProfile: Profile
 }
 
 export interface CalendarItemOverlay {
@@ -197,6 +270,11 @@ export interface CreateLocalTaskInput {
   ends_at?: string
   priority?: string
   visibility?: ItemVisibility
+  reward_enabled?: boolean
+  points_value?: number
+  penalty_points?: number
+  deadline_time?: string | null
+  requires_parent_approval?: boolean
 }
 
 export interface CreateGoogleEventInput {

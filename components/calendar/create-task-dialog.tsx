@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Child } from '@/types'
 import { toast } from 'sonner'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -27,6 +28,28 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
   const [priority, setPriority] = useState<'low' | 'normal' | 'high'>('normal')
   const [loading, setLoading] = useState(false)
 
+  // Reward fields
+  const [showReward, setShowReward] = useState(false)
+  const [rewardEnabled, setRewardEnabled] = useState(false)
+  const [pointsValue, setPointsValue] = useState(10)
+  const [penaltyPoints, setPenaltyPoints] = useState(0)
+  const [deadlineTime, setDeadlineTime] = useState('')
+  const [requiresApproval, setRequiresApproval] = useState(false)
+
+  function resetForm() {
+    setTitle('')
+    setDescription('')
+    setChildId('family')
+    setDueAt('')
+    setPriority('normal')
+    setShowReward(false)
+    setRewardEnabled(false)
+    setPointsValue(10)
+    setPenaltyPoints(0)
+    setDeadlineTime('')
+    setRequiresApproval(false)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
@@ -42,6 +65,11 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
           due_at: dueAt ? new Date(dueAt).toISOString() : undefined,
           priority,
           visibility: 'family',
+          reward_enabled: rewardEnabled,
+          points_value: rewardEnabled ? pointsValue : 0,
+          penalty_points: rewardEnabled ? penaltyPoints : 0,
+          deadline_time: rewardEnabled && deadlineTime ? deadlineTime : null,
+          requires_parent_approval: rewardEnabled ? requiresApproval : false,
         }),
       })
       if (!res.ok) {
@@ -49,10 +77,7 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
         throw new Error(err.error)
       }
       toast.success('משימה נוצרה')
-      setTitle('')
-      setDescription('')
-      setChildId('family')
-      setDueAt('')
+      resetForm()
       onCreated()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'שגיאה ביצירת משימה')
@@ -62,8 +87,8 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+    <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v) }}>
+      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>משימה חדשה</DialogTitle>
         </DialogHeader>
@@ -127,8 +152,85 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
               dir="ltr"
             />
           </div>
+
+          {/* Reward section toggle */}
+          <button
+            type="button"
+            onClick={() => setShowReward(v => !v)}
+            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium w-full text-right"
+          >
+            {showReward ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            הגדרות ניקוד וזמן מסך
+          </button>
+
+          {showReward && (
+            <div className="border rounded-lg p-3 space-y-3 bg-indigo-50/50">
+              {/* Enable toggle */}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rewardEnabled}
+                  onChange={e => setRewardEnabled(e.target.checked)}
+                  className="w-4 h-4 accent-indigo-600"
+                />
+                <span className="text-sm font-medium">אפשר מערכת ניקוד</span>
+              </label>
+
+              {rewardEnabled && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="points-value">נקודות עבור ביצוע</Label>
+                      <Input
+                        id="points-value"
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={pointsValue}
+                        onChange={e => setPointsValue(Number(e.target.value))}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="penalty-points">קנס אי-ביצוע</Label>
+                      <Input
+                        id="penalty-points"
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={penaltyPoints}
+                        onChange={e => setPenaltyPoints(Number(e.target.value))}
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="deadline-time">שעת דדליין</Label>
+                    <Input
+                      id="deadline-time"
+                      type="time"
+                      value={deadlineTime}
+                      onChange={e => setDeadlineTime(e.target.value)}
+                      dir="ltr"
+                    />
+                    <p className="text-xs text-muted-foreground">ביצוע לאחר שעה זו = איחור (ללא נקודות)</p>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={requiresApproval}
+                      onChange={e => setRequiresApproval(e.target.checked)}
+                      className="w-4 h-4 accent-indigo-600"
+                    />
+                    <span className="text-sm">דורש אישור הורים לפני קבלת נקודות</span>
+                  </label>
+                </>
+              )}
+            </div>
+          )}
+
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>ביטול</Button>
+            <Button type="button" variant="ghost" onClick={() => { resetForm(); onOpenChange(false) }}>ביטול</Button>
             <Button type="submit" disabled={loading || !title.trim()}>
               {loading ? 'יוצר...' : 'צור משימה'}
             </Button>
