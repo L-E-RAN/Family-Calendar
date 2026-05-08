@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist } from 'next/font/google'
+import { Rubik, Suez_One, Varela_Round } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
+const rubik = Rubik({ subsets: ['latin', 'hebrew'], variable: '--font-rubik' })
+const suezOne = Suez_One({ weight: '400', subsets: ['latin', 'hebrew'], variable: '--font-display' })
+const varelaRound = Varela_Round({ weight: '400', subsets: ['latin', 'hebrew'], variable: '--font-casual' })
 
 export const metadata: Metadata = {
   title: 'לוח שנה משפחתי | משפחת אשואל',
@@ -24,7 +26,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="he" dir="rtl" className={geist.variable}>
+    <html lang="he" dir="rtl" className={`${rubik.variable} ${suezOne.variable} ${varelaRound.variable}`}>
       <head>
         <link rel="icon" href="/icons/icon-192.png" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
