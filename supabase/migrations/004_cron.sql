@@ -20,10 +20,10 @@ select cron.schedule(
   $$
 );
 
--- Sync Mashov every 4 hours (at 07:00, 11:00, 15:00, 19:00 UTC = 09:00, 13:00, 17:00, 21:00 IST)
+-- Sync Mashov every 30 minutes
 select cron.schedule(
   'sync-mashov',
-  '0 7,11,15,19 * * *',
+  '*/30 * * * *',
   $$
     select net.http_post(
       url := current_setting('app.supabase_url') || '/functions/v1/sync-mashov',
