@@ -39,8 +39,8 @@ export default function AppShell({
       <div className="flex flex-col min-h-screen">
         {/* Desktop sidebar + mobile bottom nav */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Desktop sidebar */}
-          <aside className="hidden md:flex flex-col w-56 border-l bg-white shadow-sm">
+          {/* Desktop sidebar — lg and above only */}
+          <aside className="hidden lg:flex flex-col w-56 border-l bg-white shadow-sm">
             <div className="p-4 border-b">
               <h1 className="text-lg font-bold text-indigo-700">📅 לוח שנה</h1>
               <p className="text-sm text-muted-foreground">משפחת אשואל</p>
@@ -68,13 +68,13 @@ export default function AppShell({
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 overflow-auto pb-16 md:pb-0">
+          <main className="flex-1 overflow-auto pb-16 lg:pb-0">
             {reactChildren}
           </main>
         </div>
 
-        {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-lg z-50">
+        {/* Mobile + tablet bottom nav */}
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-lg z-50">
           <div className="flex">
             {NAV.map(item => (
               <Link

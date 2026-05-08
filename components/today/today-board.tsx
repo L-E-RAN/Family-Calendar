@@ -37,8 +37,8 @@ export default function TodayBoard({ board }: Props) {
         <p className="text-muted-foreground text-sm">{dateStr}</p>
       </div>
 
-      {/* Desktop: 5 columns side by side */}
-      <div className="hidden md:flex gap-3 overflow-x-auto pb-2 items-start">
+      {/* Tablet+: 5 columns grid, no scroll */}
+      <div className="hidden md:grid md:grid-cols-5 gap-2 items-start">
         {board.columns.map((member, idx) => (
           <MemberColumn
             key={idx}

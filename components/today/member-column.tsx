@@ -21,7 +21,7 @@ interface Props {
 export default function MemberColumn({ member, currentProfile, onCompletionChange }: Props) {
   if (member.type === 'placeholder') {
     return (
-      <div className="min-w-[200px] flex-1">
+      <div className="min-w-0 flex-1">
         <Card className="h-full border-dashed border-gray-200 bg-gray-50/50">
           <CardHeader className="pb-2 pt-4 px-4">
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -39,7 +39,7 @@ export default function MemberColumn({ member, currentProfile, onCompletionChang
   const role = member.profile?.role
 
   return (
-    <div className="min-w-[220px] flex-1">
+    <div className="min-w-0 flex-1">
       <Card className="h-full">
         <CardHeader className="pb-3 pt-4 px-4 space-y-2">
           {/* Name + role */}
