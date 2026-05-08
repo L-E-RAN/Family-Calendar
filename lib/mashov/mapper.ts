@@ -98,6 +98,7 @@ export function mapLessonToItem(
     deadline_time: null,
     requires_parent_approval: false,
     reward_enabled: false,
+    is_recurring: false,
   }
 }
 
@@ -147,6 +148,7 @@ export function mapExamToItem(
     deadline_time: null,
     requires_parent_approval: false,
     reward_enabled: false,
+    is_recurring: false,
   }
 }
 
@@ -194,5 +196,6 @@ export function mapParentApprovalToItem(
     deadline_time: null,
     requires_parent_approval: false,
     reward_enabled: false,
+    is_recurring: false,
   }
 }
