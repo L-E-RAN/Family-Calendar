@@ -41,6 +41,8 @@ export async function POST(
   // Points go to the child; completed_by_profile_id records the actual actor.
   const body = await request.json().catch(() => ({}))
   const targetChildId: string | null = body.target_child_id ?? null
+  // Tablet mode: all reward-enabled completions require PIN approval before points are awarded
+  const tabletMode: boolean = body.tablet_mode === true
 
   let completionProfileId = profile.id
   let completionChildId = item.child_id ?? profile.child_id ?? null
@@ -64,7 +66,8 @@ export async function POST(
   let status: string
   let pointsAwarded: number
 
-  if (item.requires_parent_approval) {
+  if (item.requires_parent_approval || (tabletMode && item.reward_enabled)) {
+    // Tablet mode: all reward-enabled tasks need PIN approval before points land
     status = 'completed_pending_approval'
     pointsAwarded = 0
   } else if (!item.reward_enabled) {

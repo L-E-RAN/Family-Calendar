@@ -83,7 +83,11 @@ function TaskRow({ boardItem, onClick }: { boardItem: TodayBoardItem; onClick: (
 }
 
 export default function TabletMemberColumn({ member, onCompletionChange }: Props) {
-  const [selectedItem, setSelectedItem] = useState<TodayBoardItem | null>(null)
+  // Store id only — after router.refresh() member.items updates, dialog gets fresh data
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  const selectedItem = selectedItemId
+    ? (member.items.find(i => i.item.id === selectedItemId) ?? null)
+    : null
   const name = member.child?.name ?? member.profile?.display_name ?? '—'
   const color = member.child?.color ?? '#6366f1'
   const isChild = member.type === 'child' && !!member.child
@@ -134,7 +138,7 @@ export default function TabletMemberColumn({ member, onCompletionChange }: Props
               <TaskRow
                 key={boardItem.item.id}
                 boardItem={boardItem}
-                onClick={() => setSelectedItem(boardItem)}
+                onClick={() => setSelectedItemId(boardItem.item.id)}
               />
             ))
           )}
@@ -149,7 +153,7 @@ export default function TabletMemberColumn({ member, onCompletionChange }: Props
           childName={name}
           childColor={color}
           onCompletionChange={onCompletionChange}
-          onClose={() => setSelectedItem(null)}
+          onClose={() => setSelectedItemId(null)}
         />
       )}
     </>

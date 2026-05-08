@@ -60,7 +60,10 @@ export default function TabletTaskDialog({
       const res = await fetch(`/api/today/items/${item.id}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(targetChildId ? { target_child_id: targetChildId } : {}),
+        body: JSON.stringify({
+          ...(targetChildId ? { target_child_id: targetChildId } : {}),
+          tablet_mode: true,
+        }),
       })
       if (!res.ok) {
         const body = await res.json()
@@ -69,10 +72,14 @@ export default function TabletTaskDialog({
         const body = await res.json()
         const c = body.completion
         if (c.points_awarded > 0) toast.success(`${childName} קיבל/ה ${c.points_awarded} נקודות!`)
-        else if (c.status === 'completed_pending_approval') toast.success('ממתין לאישור PIN')
-        else toast.success('בוצע!')
-        onCompletionChange()
-        onClose()
+        else if (c.status === 'completed_pending_approval') {
+          // Stay open so parent can approve immediately with PIN
+          onCompletionChange()
+        } else {
+          toast.success('בוצע!')
+          onCompletionChange()
+          onClose()
+        }
       }
     } finally {
       setLoading(false)
