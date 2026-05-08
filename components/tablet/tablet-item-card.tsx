@@ -194,36 +194,12 @@ export default function TabletItemCard({ boardItem, targetChildId, onCompletionC
               )}
             </Button>
           )}
-          {canApprove && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs h-8 border-green-300 text-green-700 hover:bg-green-50 flex items-center gap-1"
-                onClick={handleApprove}
-                disabled={loading}
-              >
-                <Lock className="w-3 h-3" />
-                {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'אשר'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs h-8 border-red-300 text-red-600 hover:bg-red-50 flex items-center gap-1"
-                onClick={handleReject}
-                disabled={loading}
-              >
-                <Lock className="w-3 h-3" />
-                דחה
-              </Button>
-            </>
-          )}
-          {status === 'completed_pending_approval' && !canApprove && (
+          {status === 'completed_pending_approval' && (
             <span className="text-xs text-yellow-600 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> ממתין לאישור
             </span>
           )}
-          {isDone && !canApprove && (
+          {isDone && status !== 'completed_pending_approval' && (
             <span className="text-xs text-muted-foreground">טופל</span>
           )}
         </div>
