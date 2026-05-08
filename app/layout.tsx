@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Rubik, Suez_One, Varela_Round } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
+import PwaRegister from '@/components/pwa-register'
 
 const rubik = Rubik({ subsets: ['latin', 'hebrew'], variable: '--font-rubik' })
 const suezOne = Suez_One({ weight: '400', subsets: ['latin', 'hebrew'], variable: '--font-display' })
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased bg-background min-h-screen">
         {children}
         <Toaster position="top-center" dir="rtl" />
+        <PwaRegister />
       </body>
     </html>
   )
