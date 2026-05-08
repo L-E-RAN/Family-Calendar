@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAuthAdminClient } from '@/lib/supabase/admin'
 
 export async function GET() {
@@ -16,8 +16,8 @@ export async function GET() {
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   if (profile.role === 'child') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const adminSupabase = await createAdminClient()
-  const { data: profiles } = await adminSupabase
+  const admin = createAuthAdminClient()
+  const { data: profiles } = await admin
     .from('profiles')
     .select('*')
     .eq('family_id', profile.family_id)
@@ -55,11 +55,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
   }
 
-  // Generate opaque internal email — users never see or use it
   const internalEmail = `member-${crypto.randomUUID()}@family.local`
 
-  const authAdmin = createAuthAdminClient()
-  const { data: newUser, error: authError } = await authAdmin.auth.admin.createUser({
+  const admin = createAuthAdminClient()
+  const { data: newUser, error: authError } = await admin.auth.admin.createUser({
     email: internalEmail,
     password,
     email_confirm: true,
@@ -69,8 +68,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: authError?.message || 'Failed to create auth user' }, { status: 500 })
   }
 
-  const adminSupabase = await createAdminClient()
-  const { data: newProfile, error: profileError } = await adminSupabase
+  const { data: newProfile, error: profileError } = await admin
     .from('profiles')
     .insert({
       auth_user_id: newUser.user.id,
@@ -82,7 +80,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (profileError) {
-    await authAdmin.auth.admin.deleteUser(newUser.user.id)
+    await admin.auth.admin.deleteUser(newUser.user.id)
     return NextResponse.json({ error: profileError.message }, { status: 500 })
   }
 

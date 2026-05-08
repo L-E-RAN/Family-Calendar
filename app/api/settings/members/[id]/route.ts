@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAuthAdminClient } from '@/lib/supabase/admin'
 
 export async function DELETE(
@@ -20,8 +20,8 @@ export async function DELETE(
   if (!callerProfile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   if (callerProfile.role !== 'family_admin') return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
 
-  const adminSupabase = await createAdminClient()
-  const { data: target } = await adminSupabase
+  const admin = createAuthAdminClient()
+  const { data: target } = await admin
     .from('profiles')
     .select('auth_user_id, family_id')
     .eq('id', id)
@@ -31,15 +31,14 @@ export async function DELETE(
   if (target.family_id !== callerProfile.family_id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   if (target.auth_user_id === user.id) return NextResponse.json({ error: 'Cannot delete yourself' }, { status: 400 })
 
-  const { error: deleteProfileError } = await adminSupabase
+  const { error: deleteProfileError } = await admin
     .from('profiles')
     .delete()
     .eq('id', id)
 
   if (deleteProfileError) return NextResponse.json({ error: deleteProfileError.message }, { status: 500 })
 
-  const authAdmin = createAuthAdminClient()
-  await authAdmin.auth.admin.deleteUser(target.auth_user_id)
+  await admin.auth.admin.deleteUser(target.auth_user_id)
 
   return NextResponse.json({ ok: true })
 }
