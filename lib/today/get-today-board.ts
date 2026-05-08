@@ -169,9 +169,10 @@ export async function getTodayBoard(
     })
 
     return memberItems.map(item => {
-      // In tablet mode, fall back to child_id lookup if member has no profile
+      // Always fall back to child_id lookup when profile-based lookup misses
+      // (covers children without login accounts, and proxy completions)
       const completion = getCompletionForMember(item, memberProfile)
-        ?? (options.tabletMode && childId
+        ?? (childId
           ? completions.find(c => c.item_id === item.id && c.child_id === childId) ?? null
           : null)
 
@@ -183,11 +184,10 @@ export async function getTodayBoard(
           })()
         : canComplete(item, memberProfile)
 
-      // canApprove: use child_id-based completion lookup in tablet mode
-      const approvalCompletion = completion
-      const itemCanApprove = options.tabletMode
-        ? currentProfile.role !== 'child' && !!approvalCompletion && approvalCompletion.status === 'completed_pending_approval'
-        : canApprove(item, memberProfile, currentProfile)
+      // canApprove: parent can approve any pending completion, in both modes
+      const itemCanApprove = currentProfile.role !== 'child'
+        && !!completion
+        && completion.status === 'completed_pending_approval'
 
       return {
         item,
