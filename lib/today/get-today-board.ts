@@ -178,10 +178,9 @@ export async function getTodayBoard(
 
   function buildScreenTime(childId: string | null): ReturnType<typeof calculateScreenTime> {
     if (!childId) return { earnedMinutes: 0, currentTier: null, nextTier: null, pointsNeededForNext: null }
-    const childTiers = tiers.filter(t => t.child_id === childId)
     const childProfile = profiles.find(p => p.child_id === childId) ?? null
     const score = buildMemberScore(childProfile, childId)
-    return calculateScreenTime(score, childTiers)
+    return calculateScreenTime(score, tiers)
   }
 
   const columns: TodayBoardMember[] = []

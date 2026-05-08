@@ -18,7 +18,6 @@ export async function GET() {
     .from('screen_time_reward_tiers')
     .select('*')
     .eq('family_id', profile.family_id)
-    .order('child_id')
     .order('min_points')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -40,17 +39,17 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { child_id, min_points, screen_time_minutes, label } = body
+  const { min_points, screen_time_minutes, label } = body
 
-  if (!child_id || min_points == null || screen_time_minutes == null) {
-    return NextResponse.json({ error: 'child_id, min_points, screen_time_minutes נדרשים' }, { status: 400 })
+  if (min_points == null || screen_time_minutes == null) {
+    return NextResponse.json({ error: 'min_points, screen_time_minutes נדרשים' }, { status: 400 })
   }
 
   const { data, error } = await supabase
     .from('screen_time_reward_tiers')
     .insert({
       family_id: profile.family_id,
-      child_id,
+      child_id: null,
       min_points: Number(min_points),
       screen_time_minutes: Number(screen_time_minutes),
       label: label || null,

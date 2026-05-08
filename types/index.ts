@@ -149,7 +149,7 @@ export interface DailyItemCompletion {
 export interface ScreenTimeRewardTier {
   id: string
   family_id: string
-  child_id: string
+  child_id: string | null
   min_points: number
   screen_time_minutes: number
   label: string | null
