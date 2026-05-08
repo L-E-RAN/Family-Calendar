@@ -161,9 +161,10 @@ export async function getTodayBoard(
 
     const memberItems = items.filter(item => {
       if (isChildMember) {
-        return item.child_id === childId
+        // Child sees their own tasks + family-wide tasks (child_id null)
+        return item.child_id === childId || item.child_id === null
       }
-      // Parent column: family-wide items (no child assigned)
+      // Parent column: family-wide items only
       return item.child_id === null
     })
 
