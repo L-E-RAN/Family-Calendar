@@ -33,12 +33,12 @@ export default function TabletBoard({ board }: Props) {
       .channel('tablet-completions')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'daily_item_completions', filter: `date=eq.${board.date}` },
+        { event: '*', schema: 'public', table: 'daily_item_completions' },
         () => router.refresh()
       )
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [board.date, router])
+  }, [router])
 
   const activeColumns = board.columns.filter(c => c.type !== 'placeholder')
 
