@@ -113,6 +113,7 @@ export interface CalendarItem {
   deadline_time: string | null
   requires_parent_approval: boolean
   reward_enabled: boolean
+  is_recurring: boolean
   // joined
   child?: Child
   overlay?: CalendarItemOverlay
@@ -275,6 +276,7 @@ export interface CreateLocalTaskInput {
   penalty_points?: number
   deadline_time?: string | null
   requires_parent_approval?: boolean
+  is_recurring?: boolean
 }
 
 export interface CreateGoogleEventInput {

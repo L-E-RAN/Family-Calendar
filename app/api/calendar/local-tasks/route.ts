@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       penalty_points: body.penalty_points ?? 0,
       deadline_time: body.deadline_time ?? null,
       requires_parent_approval: body.requires_parent_approval ?? false,
+      is_recurring: body.is_recurring ?? false,
     })
     .select()
     .single()

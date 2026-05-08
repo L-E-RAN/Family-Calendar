@@ -22,6 +22,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     'title', 'description', 'due_at', 'starts_at', 'ends_at',
     'priority', 'visibility', 'child_id', 'status',
     'reward_enabled', 'points_value', 'penalty_points', 'deadline_time', 'requires_parent_approval',
+    'is_recurring',
   ]
   const update: Record<string, unknown> = { updated_by_profile_id: profile.id }
   for (const field of allowedFields) {

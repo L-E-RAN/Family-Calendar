@@ -27,6 +27,7 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
   const [dueAt, setDueAt] = useState('')
   const [priority, setPriority] = useState<'low' | 'normal' | 'high'>('normal')
   const [loading, setLoading] = useState(false)
+  const [isRecurring, setIsRecurring] = useState(false)
 
   // Reward fields
   const [showReward, setShowReward] = useState(false)
@@ -42,6 +43,7 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
     setChildId('family')
     setDueAt('')
     setPriority('normal')
+    setIsRecurring(false)
     setShowReward(false)
     setRewardEnabled(false)
     setPointsValue(10)
@@ -65,6 +67,7 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
           due_at: dueAt ? new Date(dueAt).toISOString() : undefined,
           priority,
           visibility: 'family',
+          is_recurring: isRecurring,
           reward_enabled: rewardEnabled,
           points_value: rewardEnabled ? pointsValue : 0,
           penalty_points: rewardEnabled ? penaltyPoints : 0,
@@ -152,6 +155,17 @@ export default function CreateTaskDialog({ open, onOpenChange, children, onCreat
               dir="ltr"
             />
           </div>
+
+          {/* Recurring toggle */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={e => setIsRecurring(e.target.checked)}
+              className="w-4 h-4 accent-indigo-600"
+            />
+            <span className="text-sm font-medium">משימה קבועה — תופיע מחדש כל יום</span>
+          </label>
 
           {/* Reward section toggle */}
           <button
