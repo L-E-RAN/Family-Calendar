@@ -31,15 +31,11 @@ export default function TodayBoard({ board }: Props) {
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel('today-completions')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'daily_item_completions' },
-        () => router.refresh()
-      )
+      .channel(`family-${board.currentProfile.family_id}`)
+      .on('broadcast', { event: 'completion_changed' }, () => router.refresh())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [router])
+  }, [board.currentProfile.family_id, router])
 
   const activeColumns = board.columns.filter(c => c.type !== 'placeholder')
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import { evaluateDeadline } from '@/lib/rewards/evaluate-deadline'
+import { broadcastCompletionChange } from '@/lib/realtime/broadcast'
 
 export async function POST(
   request: NextRequest,
@@ -96,6 +97,8 @@ export async function POST(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  broadcastCompletionChange(profile.family_id)
 
   // Non-recurring tasks are marked done on the item itself so they don't reappear tomorrow
   if (!item.is_recurring && item.source_provider === 'local') {
