@@ -37,6 +37,17 @@ export default function TabletBoard({ board }: Props) {
     requestPin(() => router.push('/settings/integrations'))
   }
 
+  async function handleSignOut() {
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  function goToSignOut() {
+    requestPin(() => handleSignOut())
+  }
+
   return (
     <div className="min-h-screen p-4 space-y-4" dir="rtl">
       {/* Header */}
@@ -53,6 +64,14 @@ export default function TabletBoard({ board }: Props) {
           >
             <Settings className="w-4 h-4" />
             <span className="hidden sm:inline">הגדרות</span>
+          </button>
+          <button
+            onClick={goToSignOut}
+            className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 border border-red-200 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors"
+            title="התנתקות (דורש PIN)"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">התנתקות</span>
           </button>
         </div>
       </div>
