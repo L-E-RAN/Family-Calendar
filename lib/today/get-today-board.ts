@@ -86,7 +86,7 @@ export async function getTodayBoard(
     base().eq('source_type', 'exam').gte('starts_at', todayStart).lte('starts_at', twoWeeks),
     base().eq('source_type', 'homework').gte('due_at', todayStart).lte('due_at', todayEnd),
     base().eq('source_type', 'homework').is('due_at', null),
-    base().eq('source_type', 'task').eq('status', 'active'),
+    base().eq('source_type', 'task').eq('status', 'active').or(`due_at.is.null,and(due_at.gte.${todayStart},due_at.lte.${todayEnd})`),
     base().eq('source_type', 'parent_approval').eq('status', 'needs_action'),
     base().eq('source_type', 'event').gte('starts_at', todayStart).lte('starts_at', todayEnd),
   ])

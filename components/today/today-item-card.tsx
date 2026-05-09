@@ -104,9 +104,10 @@ export default function TodayItemCard({ boardItem, currentProfile, onCompletionC
   }
 
   const isDone = ['completed', 'approved', 'late', 'missed'].includes(status)
+  const isPenalty = item.points_value === 0 && item.penalty_points > 0 && (completion?.penalty_applied ?? 0) > 0
 
   return (
-    <div className={`rounded-lg border bg-white p-3 space-y-2 ${isDone ? 'opacity-60' : ''}`}>
+    <div className={`rounded-lg border p-3 space-y-2 ${isPenalty ? 'bg-red-50 border-red-200' : 'bg-white'} ${isDone ? 'opacity-60' : ''}`}>
       {/* Title + type badge */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">

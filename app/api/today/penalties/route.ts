@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
   const completionDate = getLogicalDateString()
   const dedupeKey = `local:penalty:${profile.family_id}:${Date.now()}:${Math.random().toString(36).slice(2)}`
 
-  // Create a completed calendar_item so it won't appear in the active board
+  // Use today's date bounds so the task appears on the board today only
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
   const { data: item, error: itemError } = await supabase
     .from('calendar_items')
     .insert({
@@ -38,8 +41,9 @@ export async function POST(request: NextRequest) {
       source_type: 'task',
       dedupe_key: dedupeKey,
       title: task_name.trim(),
-      all_day: true,
-      status: 'completed',
+      all_day: false,
+      due_at: todayEnd.toISOString(),
+      status: 'active',
       priority: 'normal',
       visibility: 'family',
       is_editable: false,
