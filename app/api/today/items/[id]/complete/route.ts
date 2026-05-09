@@ -79,22 +79,52 @@ export async function POST(
     pointsAwarded = eval_.pointsToAward
   }
 
-  const { data, error } = await supabase
+  // Find existing completion for this specific child (or profile when no child).
+  // We do select-first instead of upsert because the unique key is a functional expression
+  // (COALESCE(child_id, profile_id)) that PostgREST onConflict can't target directly.
+  const existingQuery = supabase
     .from('daily_item_completions')
-    .upsert({
-      family_id: profile.family_id,
-      item_id: id,
-      profile_id: completionProfileId,
-      child_id: completionChildId,
-      completion_date: completionDate,
-      status,
-      completed_at: now.toISOString(),
-      completed_by_profile_id: profile.id,
-      points_awarded: pointsAwarded,
-      penalty_applied: 0,
-    }, { onConflict: 'item_id,profile_id,completion_date' })
-    .select()
-    .single()
+    .select('id, status')
+    .eq('item_id', id)
+    .eq('family_id', profile.family_id)
+    .eq('completion_date', completionDate)
+
+  const { data: existing } = await (
+    completionChildId
+      ? existingQuery.eq('child_id', completionChildId)
+      : existingQuery.eq('profile_id', completionProfileId).is('child_id', null)
+  ).maybeSingle()
+
+  // Guard: never overwrite a completion that is already in a terminal state
+  if (existing && ['completed', 'approved', 'completed_pending_approval', 'late', 'missed'].includes(existing.status)) {
+    return NextResponse.json({ error: 'Already completed' }, { status: 409 })
+  }
+
+  const completionPayload = {
+    family_id: profile.family_id,
+    item_id: id,
+    profile_id: completionProfileId,
+    child_id: completionChildId,
+    completion_date: completionDate,
+    status,
+    completed_at: now.toISOString(),
+    completed_by_profile_id: profile.id,
+    points_awarded: pointsAwarded,
+    penalty_applied: 0,
+  }
+
+  const { data, error } = existing
+    ? await supabase
+        .from('daily_item_completions')
+        .update(completionPayload)
+        .eq('id', existing.id)
+        .select()
+        .single()
+    : await supabase
+        .from('daily_item_completions')
+        .insert(completionPayload)
+        .select()
+        .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
