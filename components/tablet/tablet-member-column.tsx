@@ -134,13 +134,22 @@ export default function TabletMemberColumn({ member, onCompletionChange }: Props
           {member.items.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-6">אין משימות להיום</p>
           ) : (
-            member.items.map(boardItem => (
-              <TaskRow
-                key={boardItem.item.id}
-                boardItem={boardItem}
-                onClick={() => setSelectedItemId(boardItem.item.id)}
-              />
-            ))
+            [...member.items]
+              .sort((a, b) => {
+                const aDone = ['completed', 'approved', 'late', 'missed'].includes(a.completion?.status ?? '')
+                const bDone = ['completed', 'approved', 'late', 'missed'].includes(b.completion?.status ?? '')
+                if (aDone !== bDone) return aDone ? 1 : -1
+                const aTime = a.item.deadline_time ?? a.item.starts_at ?? ''
+                const bTime = b.item.deadline_time ?? b.item.starts_at ?? ''
+                return aTime.localeCompare(bTime)
+              })
+              .map(boardItem => (
+                <TaskRow
+                  key={boardItem.item.id}
+                  boardItem={boardItem}
+                  onClick={() => setSelectedItemId(boardItem.item.id)}
+                />
+              ))
           )}
         </div>
       </div>
