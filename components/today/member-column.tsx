@@ -1,10 +1,15 @@
+'use client'
+
+import { useState } from 'react'
 import type { TodayBoardMember, Profile } from '@/types'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { User, MinusCircle } from 'lucide-react'
 import ScoreSummary from './score-summary'
 import ScreenTimeSummary from './screen-time-summary'
 import TodayItemCard from './today-item-card'
+import PenaltyDialog from './penalty-dialog'
 
 const ROLE_LABELS: Record<string, string> = {
   family_admin: 'מנהל',
@@ -19,6 +24,8 @@ interface Props {
 }
 
 export default function MemberColumn({ member, currentProfile, onCompletionChange }: Props) {
+  const [penaltyOpen, setPenaltyOpen] = useState(false)
+
   if (member.type === 'placeholder') {
     return (
       <div className="min-w-0 flex-1">
@@ -37,12 +44,14 @@ export default function MemberColumn({ member, currentProfile, onCompletionChang
   const name = member.child?.name ?? member.profile?.display_name ?? '—'
   const color = member.child?.color ?? '#6366f1'
   const role = member.profile?.role
+  const isParentOrAdmin = currentProfile.role === 'family_admin' || currentProfile.role === 'parent'
+  const isChildColumn = member.type === 'child' && !!member.child
 
   return (
     <div className="min-w-0 flex-1">
       <Card className="h-full">
         <CardHeader className="pb-3 pt-4 px-4 space-y-2">
-          {/* Name + role */}
+          {/* Name + role + penalty button */}
           <div className="flex items-center gap-2">
             <div
               className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-white text-sm font-bold"
@@ -58,6 +67,17 @@ export default function MemberColumn({ member, currentProfile, onCompletionChang
                 </Badge>
               )}
             </div>
+            {isParentOrAdmin && isChildColumn && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 gap-1 text-xs h-7 px-2"
+                onClick={() => setPenaltyOpen(true)}
+              >
+                <MinusCircle className="w-3.5 h-3.5" />
+                הורדת נקודות
+              </Button>
+            )}
           </div>
 
           {/* Score */}
@@ -89,6 +109,16 @@ export default function MemberColumn({ member, currentProfile, onCompletionChang
           )}
         </CardContent>
       </Card>
+
+      {isChildColumn && member.child && (
+        <PenaltyDialog
+          open={penaltyOpen}
+          onOpenChange={setPenaltyOpen}
+          childId={member.child.id}
+          childName={name}
+          onSuccess={onCompletionChange}
+        />
+      )}
     </div>
   )
 }
