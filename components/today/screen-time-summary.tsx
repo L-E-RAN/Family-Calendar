@@ -30,7 +30,7 @@ export default function ScreenTimeSummary({
         {expired ? (
           <span className="text-gray-400">זמן מסך: פג תוקף (מתאפס מחר)</span>
         ) : (
-          <span>זמן מסך: {effectiveMinutes > 0 ? timeLabel : 'טרם הושג'}</span>
+          <span>זמן מסך שקיבלת: {effectiveMinutes > 0 ? `${effectiveMinutes} דקות` : 'טרם הושג'}</span>
         )}
       </div>
       {!expired && nextTierPointsNeeded !== null && nextTierMinutes !== null && (
