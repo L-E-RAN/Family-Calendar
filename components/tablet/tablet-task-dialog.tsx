@@ -212,31 +212,10 @@ export default function TabletTaskDialog({
               </button>
             )}
 
-            {canApprove && (
-              <div className="flex gap-3">
-                <button
-                  onClick={() => requestPin(() => doApprove())}
-                  disabled={loading}
-                  className="flex-1 py-3 rounded-2xl bg-green-500 text-white font-bold text-lg flex items-center justify-center gap-2 active:scale-95 disabled:opacity-60"
-                >
-                  <Lock className="w-4 h-4" />
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אשר ✓'}
-                </button>
-                <button
-                  onClick={() => requestPin(() => doReject())}
-                  disabled={loading}
-                  className="flex-1 py-3 rounded-2xl bg-red-100 text-red-600 font-bold text-lg flex items-center justify-center gap-2 active:scale-95 disabled:opacity-60"
-                >
-                  <Lock className="w-4 h-4" />
-                  דחה ✗
-                </button>
-              </div>
-            )}
-
-            {isPendingApproval && !canApprove && (
+            {isPendingApproval && (
               <div className="text-center text-yellow-600 text-sm flex items-center justify-center gap-2 py-2">
                 <AlertCircle className="w-4 h-4" />
-                ממתין לאישור הורים (נדרש PIN)
+                ממתין לאישור הורים
               </div>
             )}
           </div>
