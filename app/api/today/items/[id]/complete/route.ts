@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { format } from 'date-fns'
+import { getLogicalDateString } from '@/lib/today/logical-date'
 import { evaluateDeadline } from '@/lib/rewards/evaluate-deadline'
 import { broadcastCompletionChange } from '@/lib/realtime/broadcast'
 
@@ -61,7 +61,7 @@ export async function POST(
   }
 
   const now = new Date()
-  const completionDate = format(now, 'yyyy-MM-dd')
+  const completionDate = getLogicalDateString()
   const eval_ = evaluateDeadline(item, now, completionDate)
 
   let status: string

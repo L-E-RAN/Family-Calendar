@@ -16,6 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .single()
 
   if (!profile) redirect('/setup')
+  if (profile.tablet_only) redirect('/tablet')
 
   const { data: children_data } = await supabase
     .from('children')

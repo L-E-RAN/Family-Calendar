@@ -9,8 +9,17 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
+const DAY_RESET_HOUR = 22
+
 function todayDateString(timezone = 'Asia/Jerusalem'): string {
-  return new Date().toLocaleDateString('en-CA', { timeZone: timezone })
+  const now = new Date()
+  const hour = parseInt(
+    now.toLocaleTimeString('en-GB', { timeZone: timezone, hour12: false }).slice(0, 2)
+  )
+  const base = hour >= DAY_RESET_HOUR
+    ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
+    : now
+  return base.toLocaleDateString('en-CA', { timeZone: timezone })
 }
 
 function timeToMinutes(t: string): number {
@@ -54,6 +63,8 @@ Deno.serve(async (_req) => {
     if (!items || items.length === 0) continue
 
     for (const item of items) {
+      // After 22:00 the new logical day just started — no deadlines can have passed yet
+      if (familyNowMins >= DAY_RESET_HOUR * 60) continue
       const deadlineMins = timeToMinutes(item.deadline_time)
       if (familyNowMins <= deadlineMins) continue // deadline not yet passed
 

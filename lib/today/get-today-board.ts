@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { startOfDay, endOfDay, format } from 'date-fns'
+import { startOfDay, endOfDay } from 'date-fns'
+import { getLogicalDate, getLogicalDateString } from './logical-date'
 import type {
   Profile,
   Child,
@@ -22,10 +23,11 @@ export interface GetTodayBoardOptions {
 
 export async function getTodayBoard(
   supabase: SupabaseClient,
-  date: Date = new Date(),
+  _date?: Date,
   options: GetTodayBoardOptions = {},
 ): Promise<TodayBoard> {
-  const dateStr = format(date, 'yyyy-MM-dd')
+  const date = getLogicalDate()
+  const dateStr = getLogicalDateString()
   const todayStart = startOfDay(date).toISOString()
   const todayEnd = endOfDay(date).toISOString()
   const twoWeeks = new Date(date.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()

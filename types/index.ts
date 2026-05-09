@@ -27,6 +27,7 @@ export interface Profile {
   child_id: string | null
   phone: string | null
   avatar_url: string | null
+  tablet_only: boolean
   created_at: string
   updated_at: string
 }
