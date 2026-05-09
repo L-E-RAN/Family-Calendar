@@ -158,6 +158,9 @@ export default function TabletItemCard({ boardItem, targetChildId, onCompletionC
       {item.reward_enabled && item.points_value > 0 && (
         <div className="text-xs text-green-600">+{item.points_value} נק׳</div>
       )}
+      {item.reward_enabled && item.points_value === 0 && (completion?.penalty_applied ?? 0) > 0 && (
+        <div className="text-xs text-red-500 font-medium">-{completion!.penalty_applied} נק׳</div>
+      )}
 
       {/* Completion feedback */}
       {(completion?.penalty_applied ?? 0) > 0 && (
