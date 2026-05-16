@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
         .eq('selected', true)
 
       calendars = refetched
-    } catch {
-      // fall through to error below
+    } catch (autoErr) {
+      console.error('[sync-now] auto-populate failed:', autoErr instanceof Error ? autoErr.message : autoErr)
     }
   }
 
