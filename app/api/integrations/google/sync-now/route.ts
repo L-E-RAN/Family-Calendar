@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { getAccessToken, fetchCalendarEvents, mapGoogleEventToItem } from '@/lib/google/calendar'
+import { getAccessToken, fetchCalendarEvents, mapGoogleEventToItem, listCalendars } from '@/lib/google/calendar'
 import { subMonths, addMonths } from 'date-fns'
 
 export async function POST(request: NextRequest) {
@@ -34,11 +34,48 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'אין פרטי חיבור' }, { status: 400 })
   }
 
-  const { data: calendars } = await adminSupabase
+  let { data: calendars } = await adminSupabase
     .from('external_calendars')
     .select('id, provider_calendar_id, name, writable')
     .eq('integration_id', integration.id)
     .eq('selected', true)
+
+  // Auto-populate external_calendars if empty (callback may have failed to save them)
+  if (!calendars?.length) {
+    try {
+      const accessToken = await getAccessToken(integration.encrypted_secret_ref)
+      const items = await listCalendars(accessToken)
+      const familyCal = items.find(c => c.summary === 'משפחת אשואל')
+      const primaryCal = items.find(c => c.primary === true)
+      const selectedId = familyCal?.id || primaryCal?.id
+
+      for (const item of items) {
+        if (!item.id || !item.summary) continue
+        await adminSupabase
+          .from('external_calendars')
+          .upsert({
+            family_id: profile.family_id,
+            integration_id: integration.id,
+            provider_calendar_id: item.id,
+            name: item.summary,
+            color: item.backgroundColor || '#4285f4',
+            selected: item.id === selectedId,
+            writable: item.accessRole === 'owner' || item.accessRole === 'writer',
+            default_for_new_events: item.id === selectedId,
+          }, { onConflict: 'integration_id,provider_calendar_id' })
+      }
+
+      const { data: refetched } = await adminSupabase
+        .from('external_calendars')
+        .select('id, provider_calendar_id, name, writable')
+        .eq('integration_id', integration.id)
+        .eq('selected', true)
+
+      calendars = refetched
+    } catch {
+      // fall through to error below
+    }
+  }
 
   if (!calendars?.length) {
     return NextResponse.json({ error: 'לא נמצאו לוחות שנה מחוברים' }, { status: 400 })

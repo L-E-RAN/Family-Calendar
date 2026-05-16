@@ -61,29 +61,36 @@ export async function GET(request: NextRequest) {
       throw new Error(intError?.message || 'Failed to save integration')
     }
 
-    // Find "משפחת אשואל" calendar
+    // Fetch all calendars from Google and save them
     const { createOAuthClient } = await import('@/lib/google/calendar')
     const oauth = createOAuthClient()
     oauth.setCredentials({ access_token: tokens.access_token || undefined, refresh_token: tokens.refresh_token })
     const { google } = await import('googleapis')
     const cal = google.calendar({ version: 'v3', auth: oauth })
     const calList = await cal.calendarList.list()
-    const familyCal = (calList.data.items || []).find(c => c.summary === 'משפחת אשואל')
+    const items = calList.data.items || []
 
-    if (familyCal) {
+    const familyCal = items.find(c => c.summary === 'משפחת אשואל')
+    const primaryCal = items.find(c => c.primary === true)
+    const selectedId = familyCal?.id || primaryCal?.id
+
+    for (const item of items) {
+      if (!item.id || !item.summary) continue
       await adminSupabase
         .from('external_calendars')
         .upsert({
           family_id: profile.family_id,
           integration_id: integration.id,
-          provider_calendar_id: familyCal.id!,
-          name: familyCal.summary!,
-          color: familyCal.backgroundColor || '#4285f4',
-          selected: true,
-          writable: familyCal.accessRole === 'owner' || familyCal.accessRole === 'writer',
-          default_for_new_events: true,
+          provider_calendar_id: item.id,
+          name: item.summary,
+          color: item.backgroundColor || '#4285f4',
+          selected: item.id === selectedId,
+          writable: item.accessRole === 'owner' || item.accessRole === 'writer',
+          default_for_new_events: item.id === selectedId,
         }, { onConflict: 'integration_id,provider_calendar_id' })
     }
+
+    const selectedCal = familyCal || primaryCal
 
     // Log success
     await adminSupabase.from('sync_logs').insert({
@@ -91,7 +98,7 @@ export async function GET(request: NextRequest) {
       integration_id: integration.id,
       level: 'info',
       message: 'Google Calendar connected successfully',
-      metadata: { calendar: familyCal?.summary, writable: familyCal?.accessRole },
+      metadata: { calendar: selectedCal?.summary, writable: selectedCal?.accessRole, totalCalendars: items.length },
     })
 
     const response = NextResponse.redirect(new URL('/settings/integrations?success=google_connected', request.url))
