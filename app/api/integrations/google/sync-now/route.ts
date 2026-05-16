@@ -73,7 +73,9 @@ export async function POST(request: NextRequest) {
 
       calendars = refetched
     } catch (autoErr) {
-      console.error('[sync-now] auto-populate failed:', autoErr instanceof Error ? autoErr.message : autoErr)
+      const autoErrMsg = autoErr instanceof Error ? autoErr.message : String(autoErr)
+      console.error('[sync-now] auto-populate failed:', autoErrMsg)
+      return NextResponse.json({ error: `שגיאת auto-populate: ${autoErrMsg}` }, { status: 400 })
     }
   }
 
