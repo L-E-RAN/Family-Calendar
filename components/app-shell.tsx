@@ -2,10 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, Sun, CheckSquare, Users, Settings, Tablet } from 'lucide-react'
+import {
+  CalendarDays, Sun, CheckSquare, Users, Settings, Tablet,
+  ShoppingCart, Inbox, FileText, Package, PawPrint, Wrench,
+  Bot, MoreHorizontal, Bell
+} from 'lucide-react'
 import type { Profile, Child } from '@/types'
 import { cn } from '@/lib/utils'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 interface AppContext {
   profile: Profile & { child?: Child }
@@ -15,14 +19,23 @@ interface AppContext {
 const AppCtx = createContext<AppContext>({ profile: {} as AppContext['profile'], children: [] })
 export const useApp = () => useContext(AppCtx)
 
-const NAV = [
-  { href: '/today', icon: Sun, label: 'היום' },
-  { href: '/calendar', icon: CalendarDays, label: 'לוח' },
-  { href: '/tasks', icon: CheckSquare, label: 'משימות' },
-  { href: '/children', icon: Users, label: 'ילדים' },
-  { href: '/settings/tablet', icon: Tablet, label: 'טאבלט' },
+const ALL_NAV = [
+  { href: '/today',    icon: Sun,          label: 'היום' },
+  { href: '/calendar', icon: CalendarDays, label: 'לוח שנה' },
+  { href: '/tasks',    icon: CheckSquare,  label: 'משימות' },
+  { href: '/shopping', icon: ShoppingCart, label: 'קניות' },
+  { href: '/inbox',    icon: Inbox,        label: 'תיבת משפחה' },
+  { href: '/documents',icon: FileText,     label: 'מסמכים' },
+  { href: '/assets',   icon: Package,      label: 'מוצרים' },
+  { href: '/pets',     icon: PawPrint,     label: "צ'ארלי" },
+  { href: '/maintenance', icon: Wrench,    label: 'תחזוקה' },
+  { href: '/assistant',icon: Bot,          label: 'עוזר' },
+  { href: '/children', icon: Users,        label: 'ילדים' },
   { href: '/settings/integrations', icon: Settings, label: 'הגדרות' },
 ]
+
+// Bottom nav: 5 primary items + "more" sheet
+const BOTTOM_PRIMARY = ['/today', '/calendar', '/tasks', '/shopping', '/inbox']
 
 export default function AppShell({
   profile,
@@ -34,20 +47,23 @@ export default function AppShell({
   reactChildren: React.ReactNode
 }) {
   const pathname = usePathname()
+  const [moreOpen, setMoreOpen] = useState(false)
+
+  const primaryNav = ALL_NAV.filter(n => BOTTOM_PRIMARY.includes(n.href))
+  const moreNav = ALL_NAV.filter(n => !BOTTOM_PRIMARY.includes(n.href))
 
   return (
     <AppCtx.Provider value={{ profile, children: familyChildren }}>
       <div className="flex flex-col min-h-screen">
-        {/* Desktop sidebar + mobile bottom nav */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Desktop sidebar — lg and above only */}
-          <aside className="hidden lg:flex flex-col w-56 border-l bg-white shadow-sm">
+          {/* Desktop sidebar */}
+          <aside className="hidden lg:flex flex-col w-60 border-l bg-white shadow-sm">
             <div className="p-4 border-b">
-              <h1 className="text-lg font-bold text-indigo-700">📅 לוח שנה</h1>
+              <h1 className="text-lg font-bold text-indigo-700">🏠 Family OS</h1>
               <p className="text-sm text-muted-foreground">משפחת אשואל</p>
             </div>
-            <nav className="flex-1 p-2 space-y-1">
-              {NAV.map(item => (
+            <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+              {ALL_NAV.map(item => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -58,7 +74,7 @@ export default function AppShell({
                       : 'text-gray-600 hover:bg-gray-100'
                   )}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-4 h-4 shrink-0" />
                   {item.label}
                 </Link>
               ))}
@@ -74,26 +90,64 @@ export default function AppShell({
           </main>
         </div>
 
-        {/* Mobile + tablet bottom nav */}
+        {/* Mobile bottom nav */}
         <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-lg z-50">
           <div className="flex">
-            {NAV.map(item => (
+            {primaryNav.map(item => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   'flex-1 flex flex-col items-center py-2 text-xs transition-colors',
-                  pathname.startsWith(item.href)
-                    ? 'text-indigo-700'
-                    : 'text-gray-500'
+                  pathname.startsWith(item.href) ? 'text-indigo-700' : 'text-gray-500'
                 )}
               >
                 <item.icon className={cn('w-5 h-5 mb-0.5', pathname.startsWith(item.href) ? 'text-indigo-700' : 'text-gray-400')} />
                 {item.label}
               </Link>
             ))}
+            {/* More button */}
+            <button
+              onClick={() => setMoreOpen(v => !v)}
+              className={cn(
+                'flex-1 flex flex-col items-center py-2 text-xs transition-colors',
+                moreOpen ? 'text-indigo-700' : 'text-gray-500'
+              )}
+            >
+              <MoreHorizontal className={cn('w-5 h-5 mb-0.5', moreOpen ? 'text-indigo-700' : 'text-gray-400')} />
+              עוד
+            </button>
           </div>
         </nav>
+
+        {/* Mobile "more" drawer */}
+        {moreOpen && (
+          <div className="lg:hidden fixed inset-0 z-40" onClick={() => setMoreOpen(false)}>
+            <div
+              className="absolute bottom-16 inset-x-0 bg-white border-t rounded-t-2xl shadow-xl p-4"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="grid grid-cols-4 gap-2">
+                {moreNav.map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMoreOpen(false)}
+                    className={cn(
+                      'flex flex-col items-center gap-1 p-3 rounded-xl text-xs font-medium transition-colors',
+                      pathname.startsWith(item.href)
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    )}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppCtx.Provider>
   )

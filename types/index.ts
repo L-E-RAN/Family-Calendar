@@ -255,6 +255,217 @@ export interface SyncLog {
   created_at: string
 }
 
+// ============================================================
+// FAMILY OS — NEW TYPES
+// ============================================================
+
+export type ShoppingItemStatus = 'active' | 'completed' | 'archived'
+export type InboxItemStatus = 'inbox' | 'triaged' | 'archived' | 'converted'
+export type InboxSuggestedType = 'task' | 'shopping_item' | 'event' | 'document' | 'pet_event' | 'maintenance_task' | 'warranty_item'
+export type DocumentType = 'receipt' | 'warranty' | 'insurance' | 'contract' | 'medical' | 'school' | 'pet' | 'other'
+export type DocumentVisibility = 'family' | 'parents_only'
+export type PetEventType = 'vaccine' | 'medication' | 'vet_visit' | 'grooming' | 'weight' | 'food' | 'walk' | 'other'
+export type PetEventStatus = 'active' | 'completed' | 'cancelled'
+export type MaintenanceStatus = 'active' | 'completed' | 'skipped' | 'cancelled'
+export type AssistantRole = 'user' | 'assistant' | 'system'
+
+export interface ShoppingList {
+  id: string
+  family_id: string
+  name: string
+  is_default: boolean
+  created_by_profile_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ShoppingItem {
+  id: string
+  family_id: string
+  list_id: string
+  title: string
+  quantity: string | null
+  category: string | null
+  status: ShoppingItemStatus
+  added_by_profile_id: string | null
+  completed_by_profile_id: string | null
+  completed_at: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  added_by?: Profile
+  completed_by?: Profile
+}
+
+export interface FamilyInboxItem {
+  id: string
+  family_id: string
+  created_by_profile_id: string | null
+  assigned_profile_id: string | null
+  title: string
+  body: string | null
+  status: InboxItemStatus
+  suggested_type: InboxSuggestedType | null
+  source: string
+  raw_input: string | null
+  converted_entity_type: string | null
+  converted_entity_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Document {
+  id: string
+  family_id: string
+  uploaded_by_profile_id: string | null
+  title: string
+  type: DocumentType
+  storage_path: string | null
+  file_name: string | null
+  mime_type: string | null
+  size_bytes: number | null
+  visibility: DocumentVisibility
+  related_entity_type: string | null
+  related_entity_id: string | null
+  expires_at: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface HomeAsset {
+  id: string
+  family_id: string
+  created_by_profile_id: string | null
+  name: string
+  category: string | null
+  brand: string | null
+  model: string | null
+  serial_number: string | null
+  purchase_date: string | null
+  purchase_store: string | null
+  purchase_price: number | null
+  warranty_until: string | null
+  receipt_document_id: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  receipt_document?: Document
+}
+
+export interface Pet {
+  id: string
+  family_id: string
+  name: string
+  type: string
+  breed: string | null
+  birth_date: string | null
+  avatar_url: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PetEvent {
+  id: string
+  family_id: string
+  pet_id: string
+  created_by_profile_id: string | null
+  type: PetEventType
+  title: string
+  event_date: string | null
+  due_at: string | null
+  repeat_rule: string | null
+  status: PetEventStatus
+  document_id: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  pet?: Pet
+}
+
+export interface HomeMaintenanceTask {
+  id: string
+  family_id: string
+  created_by_profile_id: string | null
+  title: string
+  area: string | null
+  category: string | null
+  due_at: string | null
+  repeat_rule: string | null
+  status: MaintenanceStatus
+  assigned_profile_id: string | null
+  last_completed_at: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface FamilyNotification {
+  id: string
+  family_id: string
+  profile_id: string
+  title: string
+  body: string | null
+  type: string | null
+  entity_type: string | null
+  entity_id: string | null
+  scheduled_at: string | null
+  sent_at: string | null
+  read_at: string | null
+  created_at: string
+}
+
+export interface ActivityLogEntry {
+  id: string
+  family_id: string
+  actor_profile_id: string | null
+  action: string
+  entity_type: string
+  entity_id: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  // joined
+  actor?: Profile
+}
+
+export interface AutomationRule {
+  id: string
+  family_id: string
+  created_by_profile_id: string | null
+  name: string
+  description: string | null
+  enabled: boolean
+  trigger_type: string
+  conditions: Record<string, unknown>
+  actions: unknown[]
+  created_at: string
+  updated_at: string
+}
+
+export interface AssistantMessage {
+  id: string
+  family_id: string
+  profile_id: string | null
+  role: AssistantRole
+  content: string
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export interface AssistantSuggestedAction {
+  type: 'create_shopping_item' | 'create_task' | 'create_pet_event' | 'create_maintenance_task' | 'create_inbox_item'
+  title: string
+  metadata?: Record<string, unknown>
+}
+
+export interface AssistantResponse {
+  message: string
+  suggestedAction?: AssistantSuggestedAction
+}
+
 // UI-specific types
 export interface CalendarFilter {
   childIds: string[]
